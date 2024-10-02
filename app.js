@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import testRoute from './routes/test.js';
 import indexRoute from './routes/index.js';
 import messagesRoute from './routes/messages.js';
+import userRoute from './routes/users.js';
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ db.once('open', () => console.log('Connected to database'));
 app.use('/', indexRoute);
 app.use('/test', testRoute);
 app.use('/messages', messagesRoute);
+app.use('/users', userRoute);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

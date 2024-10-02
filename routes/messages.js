@@ -6,7 +6,7 @@ const router = express.Router();
 // GET: Retrieve all messages
 router.get('/', async (req, res) => {
   // get all messages
-  const messages = await Message.find();
+  const messages = await Message.find().populate('sender', 'username email').populate('recipients', 'username email');
 
   res.json(messages);
 });
