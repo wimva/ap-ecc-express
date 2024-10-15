@@ -67,7 +67,9 @@ app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'em
 // Google will redirect to this URL after successful authentication
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
-    res.redirect('/success'); // Redirect to a success page
+    const user = req.user;
+    // Redirect back to the Expo app with user details
+    res.redirect(`testapp://auth/google/callback?user=${encodeURIComponent(user.displayName)}`);
   }
 );
 
