@@ -11,6 +11,8 @@ import indexRoute from './routes/index.js';
 import messagesRoute from './routes/messages.js';
 import userRoute from './routes/users.js';
 
+import User from './models/User.js'; // Import User model
+
 dotenv.config();
 
 const app = express();
@@ -51,9 +53,24 @@ passport.use(new GoogleStrategy({
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   callbackURL: 'https://ap-ecc-express.onrender.com/auth/google/callback'
 },
-(accessToken, refreshToken, profile, done) => {
-  console.log(profile);
-  return done(null, profile);
+async (accessToken, refreshToken, profile, done) => {
+  try {
+    // Check if user already exists
+    let user = await User.findOne({ email: profile.emails[0].value });
+    
+    if (!user) {
+      // Create a new user if not found
+      user = new User({
+        username: profile.displayName,
+        name: profile.name.givenName,
+        email: profile.emails[0].value,
+      });
+      await user.save();
+    }
+    return done(null, user);
+  } catch (error) {
+    return done(error, null);
+  }
 }));
 
 app.use('/', indexRoute);
@@ -78,8 +95,9 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
     // Retrieve the redirect URI stored in the session
     const redirectUri = req.session.redirectUri || 'exp://localhost:19000'; // Use a default fallback URI
     const userInfo = {
-      displayName: user.displayName,
-      email: user.emails[0].value,
+      id: user._id, // Include user ID
+      displayName: user.username,
+      email: user.email,
     };
 
     // Redirect back to the Expo app with user information as query params
