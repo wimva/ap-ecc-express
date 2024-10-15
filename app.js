@@ -69,7 +69,7 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
   (req, res) => {
     const user = req.user;
     // Redirect back to the Expo app with user details
-    res.redirect(`testapp://auth/google/callback?user=${encodeURIComponent(user.displayName)}`);
+    res.redirect(`testapp://callback?user=${encodeURIComponent(user.displayName)}`);
   }
 );
 
