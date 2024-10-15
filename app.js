@@ -62,14 +62,29 @@ app.use('/messages', messagesRoute);
 app.use('/users', userRoute);
 
 // Redirects to Google for authentication
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/auth/google', (req, res, next) => {
+  const redirectUri = req.query.redirectUri; // Allow redirect URI from the client
+  if (redirectUri) {
+    req.session.redirectUri = redirectUri; // Store in session for later use
+  }
+  passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+});
 
 // Google will redirect to this URL after successful authentication
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
     const user = req.user;
-    // Redirect back to the Expo app with user details
-    res.redirect(`testapp://callback?user=${encodeURIComponent(user.displayName)}`);
+
+    // Retrieve the redirect URI stored in the session
+    const redirectUri = req.session.redirectUri || 'exp://localhost:19000'; // Use a default fallback URI
+    const userInfo = {
+      displayName: user.displayName,
+      email: user.emails[0].value,
+    };
+
+    // Redirect back to the Expo app with user information as query params
+    const redirectUrl = `${redirectUri}?user=${encodeURIComponent(JSON.stringify(userInfo))}`;
+    res.redirect(redirectUrl);
   }
 );
 
