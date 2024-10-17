@@ -10,8 +10,6 @@ import indexRoute from './routes/index.js';
 import messagesRoute from './routes/messages.js';
 import userRoute from './routes/users.js';
 
-import User from './models/User.js'; // Import User model
-
 dotenv.config();
 
 const app = express();
