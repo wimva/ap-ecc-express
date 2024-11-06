@@ -9,6 +9,7 @@ import testRoute from './routes/test.js';
 import indexRoute from './routes/index.js';
 import messagesRoute from './routes/messages.js';
 import userRoute from './routes/users.js';
+import mongoStore from 'connect-mongo';
 
 dotenv.config();
 
@@ -17,11 +18,17 @@ const app = express();
 app.use(express.json());
 
 // Configure session middleware
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-}));
+app.use(
+  session({
+    store: mongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+    secret: process.env.SESSION_SECRET,
+    resave: true,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
+    },
+  }),
+);
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -33,7 +40,6 @@ passport.use(new GoogleStrategy({
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   callbackURL: 'https://ap-ecc-express.onrender.com/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
-  console.log(profile);
   try {
     const email = profile.emails[0].value;
     let user = await User.findOne({ email });
