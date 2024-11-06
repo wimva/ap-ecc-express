@@ -80,30 +80,29 @@ app.use('/users', userRoute);
 
 // Google Authentication Routes
 app.get('/auth/google', (req, res, next) => {
-  const redirectUri = req.query.redirectUri; // Allow redirect URI from the client
-  if (redirectUri) {
-    req.session.redirectUri = redirectUri; // Store in session for later use
-  }
-  console.log(req.session.redirectUri);
-  req.session.save();
-  passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+  const redirectUri = req.query.redirectUri;
+
+  const authOptions = {
+    scope: ['profile', 'email'],
+    state: JSON.stringify({ redirectUri }) // Encode redirectUri in state
+  };
+  
+  passport.authenticate('google', authOptions)(req, res, next);
 });
 
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
     const user = req.user;
-    console.log(req.session.redirectUri);
+    const { redirectUri } = JSON.parse(req.query.state); // Retrieve from state
+    const fallbackUri = 'exp://localhost:19000';
 
-    // Retrieve the redirect URI stored in the session
-    const redirectUri = req.session.redirectUri || 'exp://localhost:19000'; // Use a default fallback URI
     const userInfo = {
-      id: user._id, // Include user ID
+      id: user._id,
       username: user.username,
       email: user.email,
     };
 
-    // Redirect back to the Expo app with user information as query params
-    const redirectUrl = `${redirectUri}?user=${encodeURIComponent(JSON.stringify(userInfo))}`;
+    const redirectUrl = `${redirectUri || fallbackUri}?user=${encodeURIComponent(JSON.stringify(userInfo))}`;
     res.redirect(redirectUrl);
   }
 );
