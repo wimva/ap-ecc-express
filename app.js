@@ -78,12 +78,14 @@ app.get('/auth/google', (req, res, next) => {
   if (redirectUri) {
     req.session.redirectUri = redirectUri; // Store in session for later use
   }
+  console.log(req.session.redirectUri);
   passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
 });
 
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
     const user = req.user;
+    console.log(req.session.redirectUri);
 
     // Retrieve the redirect URI stored in the session
     const redirectUri = req.session.redirectUri || 'exp://localhost:19000'; // Use a default fallback URI
