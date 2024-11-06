@@ -85,6 +85,7 @@ app.get('/auth/google', (req, res, next) => {
     req.session.redirectUri = redirectUri; // Store in session for later use
   }
   console.log(req.session.redirectUri);
+  req.session.save();
   passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
 });
 
