@@ -11,6 +11,27 @@ router.get('/', async (req, res) => {
   res.json(users);
 });
 
+// GET: Retrieve a user ID by email
+router.get('/by-email', async (req, res) => {
+  const { email } = req.query;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email query parameter is required' });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.json({ id: user._id.toString() });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error retrieving user', error: error.message });
+  }
+});
+
 // GET: Retreive one user by ID
 router.get('/:id', async (req, res) => {
   const { id } = req.params; // == req.params.id;
