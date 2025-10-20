@@ -12,15 +12,15 @@ router.get('/', async (req, res) => {
 });
 
 // GET: Retrieve a user ID by email
-router.get('/by-email', async (req, res) => {
-  const { email } = req.query;
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
 
   if (!email) {
-    return res.status(400).json({ message: 'Email query parameter is required' });
+    return res.status(400).json({ message: 'Email body parameter is required' });
   }
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email, password });
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
