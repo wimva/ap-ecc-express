@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
 
 // GET: Retrieve a user ID by email
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password } = req.body; // normally, passwords should be hashed!
 
   if (!email) {
     return res.status(400).json({ message: 'Email body parameter is required' });
